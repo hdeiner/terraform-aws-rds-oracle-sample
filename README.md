@@ -79,4 +79,4 @@ You will be presented with JSON to the console that has our answer burried in it
 }
 ```
 
-Find the lines near the bottom that speak to the PublicIp and PublicDnsName.  Use that information to update the URL line in the liquibase.properties file after the step_1_build_database_server.sh has been executed and before step_2_provision_database.sh has been executed.
+Find the lines near the bottom that speak to the PublicIp and PublicDnsName.  Use that information to update the URL line in the liquibase.properties file after the step_1_build_database_server.sh has been executed and before step_2_provision_database.sh has been executed.  You will also have to update step_3_use_database.sh with that value as well.
