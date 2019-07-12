@@ -16,7 +16,8 @@ public class ProcessTsvFile {
 
     final int YEARS_OFFSET = 5;
 
-    final int ROWS_IN_A_COMMIT = 10;
+    final int SECONDS_IN_REPORTING_INTERVAL = 15;
+    final int ROWS_IN_A_COMMIT = 50;
     final boolean DEMO_RUN = true;
 
     String tsvFileName;
@@ -32,6 +33,7 @@ public class ProcessTsvFile {
     int tsvProcessedCount;
     int percentCompletePrevious;
     Instant startTime;
+    Instant lastReportTime;
 
     public ProcessTsvFile(String tsvFileName, String databaseDriver, String databaseURL, String databaseUsername, String databasePassword) {
         this.tsvFileName = tsvFileName;
@@ -46,10 +48,12 @@ public class ProcessTsvFile {
         if (DEMO_RUN) tsvTotalLines /= 1000;
         System.out.println(tsvFileName +
                         " - " + tsvTotalLines + " total lines" +
-                " - " + " DEMO_RUN is " + DEMO_RUN +
+                " - " + " DEMO_RUN " + DEMO_RUN +
+                " - " + SECONDS_IN_REPORTING_INTERVAL + " SECONDS_IN_REPORTING_INTERVAL "  +
                 " - " + ROWS_IN_A_COMMIT + " ROWS_IN_A_COMMIT");
         percentCompletePrevious = -1;
         startTime = Instant.now();
+        lastReportTime = startTime;
 
         try {
             TimeZone timeZone = TimeZone.getTimeZone("America/New_York");
@@ -70,9 +74,8 @@ public class ProcessTsvFile {
             parser.beginParsing(getReader(tsvFileName));
             while (((row = parser.parseNext()) != null) && (tsvProcessedCount < tsvTotalLines)) {
                 processRow(row);
-                if (++tsvProcessedCount % ROWS_IN_A_COMMIT == 0) {
-                    periodicReport();
-                }
+                ++tsvProcessedCount;
+                periodicReport();
             }
 
             periodicReport();
@@ -98,10 +101,12 @@ public class ProcessTsvFile {
             System.err.println(e.getMessage());
         }
 
-        int percentCompleteCurrent = tsvProcessedCount * 100 / tsvTotalLines;
-        if (percentCompleteCurrent != percentCompletePrevious) {
+        Instant nowTime = Instant.now();
+        long milliSecondsSinceLastReportTime = Duration.between(lastReportTime, nowTime).toMillis();
+        if (milliSecondsSinceLastReportTime >= (SECONDS_IN_REPORTING_INTERVAL*1000)) {
+            lastReportTime = nowTime;
+            int percentCompleteCurrent = tsvProcessedCount * 100 / tsvTotalLines;
             percentCompletePrevious = percentCompleteCurrent;
-            Instant nowTime = Instant.now();
             long milliSecondsElapsedTime = Duration.between(startTime, nowTime).toMillis();
             long milliSecondsProjectedCompletionTime = Math.round(Double.valueOf(milliSecondsElapsedTime) / (Double.valueOf(tsvProcessedCount) / Double.valueOf(tsvTotalLines)));
             long secondsRemainingCompletionTime = (milliSecondsProjectedCompletionTime - milliSecondsElapsedTime) / 1000;

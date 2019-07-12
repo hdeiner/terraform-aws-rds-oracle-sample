@@ -7,7 +7,6 @@ resource "aws_db_instance" "oracle" {
   name                 = "SAMPLEDB"
   username             = "oracleuser"
   password             = "password"
-  iam_database_authentication_enabled = false
   skip_final_snapshot  = true
   publicly_accessible  = true
   vpc_security_group_ids = ["${aws_security_group.oracle.id}"]

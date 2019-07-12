@@ -19,6 +19,7 @@ public class PopulateDatabase {
         new ProcessTsvFileTitleEpisode("data/title.episode.tsv", databaseDriver, databaseURL, databaseUsername, databasePassword).execute();
         new ProcessTsvFileTitlePrincipals("data/title.principals.tsv", databaseDriver, databaseURL, databaseUsername, databasePassword).execute();
         new ProcessTsvFileTitleRatings("data/title.ratings.tsv", databaseDriver, databaseURL, databaseUsername, databasePassword).execute();
+        System.exit(0);
     }
 
     private static String getLiquibaseProperty(String propertyName) {

@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sqlplus oracleuser/password@3.221.119.213:1521/SAMPLEDB @src/main/db/a-query.sql
+sqlplus oracleuser/password@34.200.1.182:1521/SAMPLEDB @src/main/db/a-query.sql
