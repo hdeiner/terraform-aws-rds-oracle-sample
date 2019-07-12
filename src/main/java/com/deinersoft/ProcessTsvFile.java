@@ -17,7 +17,7 @@ public class ProcessTsvFile {
     final int YEARS_OFFSET = 5;
 
     final int SECONDS_IN_REPORTING_INTERVAL = 15;
-    final int ROWS_IN_A_COMMIT = 50;
+    final int ROWS_IN_A_COMMIT = 100;
     final boolean DEMO_RUN = true;
 
     String tsvFileName;
@@ -31,7 +31,6 @@ public class ProcessTsvFile {
 
     int tsvTotalLines;
     int tsvProcessedCount;
-    int percentCompletePrevious;
     Instant startTime;
     Instant lastReportTime;
 
@@ -48,10 +47,9 @@ public class ProcessTsvFile {
         if (DEMO_RUN) tsvTotalLines /= 1000;
         System.out.println(tsvFileName +
                         " - " + tsvTotalLines + " total lines" +
-                " - " + " DEMO_RUN " + DEMO_RUN +
-                " - " + SECONDS_IN_REPORTING_INTERVAL + " SECONDS_IN_REPORTING_INTERVAL "  +
-                " - " + ROWS_IN_A_COMMIT + " ROWS_IN_A_COMMIT");
-        percentCompletePrevious = -1;
+                 " (DEMO_RUN " + DEMO_RUN +  ", " +
+                 SECONDS_IN_REPORTING_INTERVAL + " SECONDS_IN_REPORTING_INTERVAL, "  +
+                 ROWS_IN_A_COMMIT + " ROWS_IN_A_COMMIT)");
         startTime = Instant.now();
         lastReportTime = startTime;
 
@@ -75,10 +73,18 @@ public class ProcessTsvFile {
             while (((row = parser.parseNext()) != null) && (tsvProcessedCount < tsvTotalLines)) {
                 processRow(row);
                 ++tsvProcessedCount;
+
+                if ((tsvProcessedCount % ROWS_IN_A_COMMIT) == 0) {
+                    commitDatabase();
+                }
                 periodicReport();
             }
 
+            commitDatabase();
+
+            lastReportTime = Instant.now().minusSeconds(SECONDS_IN_REPORTING_INTERVAL);
             periodicReport();
+
             connection.close();
         }
         catch(ClassNotFoundException e){
@@ -93,20 +99,21 @@ public class ProcessTsvFile {
     public void processRow(String[] row) {
     }
 
-    public void periodicReport() {
+    public void commitDatabase() {
         try {
             connection.commit();
         } catch (SQLException e) {
             System.err.println("Got an SQLException! ");
             System.err.println(e.getMessage());
         }
+    }
 
+    public void periodicReport() {
         Instant nowTime = Instant.now();
         long milliSecondsSinceLastReportTime = Duration.between(lastReportTime, nowTime).toMillis();
         if (milliSecondsSinceLastReportTime >= (SECONDS_IN_REPORTING_INTERVAL*1000)) {
             lastReportTime = nowTime;
             int percentCompleteCurrent = tsvProcessedCount * 100 / tsvTotalLines;
-            percentCompletePrevious = percentCompleteCurrent;
             long milliSecondsElapsedTime = Duration.between(startTime, nowTime).toMillis();
             long milliSecondsProjectedCompletionTime = Math.round(Double.valueOf(milliSecondsElapsedTime) / (Double.valueOf(tsvProcessedCount) / Double.valueOf(tsvTotalLines)));
             long secondsRemainingCompletionTime = (milliSecondsProjectedCompletionTime - milliSecondsElapsedTime) / 1000;
