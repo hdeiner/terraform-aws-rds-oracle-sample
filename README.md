@@ -17,13 +17,13 @@ There seems to be a problem with Terraform whereby the public ip associated with
 
 As a workaround for now, issue the following AWS CLI command:
 
-````bash
+```bash
 aws ec2 describe-network-interfaces
 ```
 
 You will be presented with JSON to the console that has our answer burried in it:
 
-```bash
+```console
 {
     "NetworkInterfaces": [
         {
