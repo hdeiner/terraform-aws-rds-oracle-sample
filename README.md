@@ -17,13 +17,13 @@ There seems to be a problem with Terraform whereby the public ip associated with
 
 As a workaround for now, issue the following AWS CLI command:
 
-``bash
+````bash
 aws ec2 describe-network-interfaces
-``
+```
 
 You will be presented with JSON to the console that has our answer burried in it:
 
-``bash
+```bash
 {
     "NetworkInterfaces": [
         {
@@ -77,6 +77,6 @@ You will be presented with JSON to the console that has our answer burried in it
         }
     ]
 }
-``
+```
 
 Find the lines near the bottom that speak to the PublicIp and PublicDnsName.  Use that information to update the URL line in the liquibase.properties file after the step_1_build_database_server.sh has been executed and before step_2_provision_database.sh has been executed.
