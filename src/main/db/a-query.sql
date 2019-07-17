@@ -1,3 +1,4 @@
+SET ECHO ON
 select count(*) from name;
 select count(*) from title;
 select count(*) from nameProfession;

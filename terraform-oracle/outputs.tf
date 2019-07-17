@@ -13,7 +13,3 @@ output "oracle_port" {
 output "oracle_name" {
   value = ["${aws_db_instance.oracle.name}"]
 }
-
-output "oracle_ip" {
-  value = ["${aws_db_instance.oracle.vpc_security_group_ids}"]
-}
